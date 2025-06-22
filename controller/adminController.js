@@ -1,8 +1,7 @@
 const AM = require('../model/adminModel')
 const bcrypt = require('bcrypt');
-const req = require('express/lib/request');
-const { status } = require('express/lib/response');
-const jwt = require('jasonwebtoken');
+
+const jwt = require('jsonwebtoken');
 
 exports.createAdmin = async (req,res) =>{
     try {
@@ -31,8 +30,13 @@ exports.createAdmin = async (req,res) =>{
 exports.adminLogin = async (req, res) => {
      try {
         const {email,password} = req.body
-
+        console.log({email,password});
+        
         const admin = await AM.findOne({email});
+        console.log(admin)
+        if (!email || !password) {
+  return res.status(400).json({ message: "Email and password are required." });
+}
         if(!admin){
             return res.status(401).json({
                 status: 'fail',
@@ -45,7 +49,7 @@ exports.adminLogin = async (req, res) => {
             return res.status(401).json({ status: 'fail', message: 'Invalid password' });
         }
 
-         const token = jwt.sign({ id: admin._id, email: admin.email }, 'caratcart');
+         const token = jwt.sign({ id: admin._id, email: admin.email }, JWT_SECRET);
         
         res.status(200).json({ status: 'success', message: 'Login successful',token:token });
      
